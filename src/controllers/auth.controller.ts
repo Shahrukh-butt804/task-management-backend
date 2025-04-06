@@ -2,10 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { cookieOptions } from "../config/constant.js";
+import { Kid } from "../models/kid.model.js";
 
 const signup = asyncHandler(
-  async (req: Request, res: Response , next : NextFunction): Promise<any> => {
-
+  async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     // return next({ statusCode: 400, message: "Mera Error" });
 
     const { fullName, email, password, role } = req.body;
@@ -64,36 +64,29 @@ const login = asyncHandler(
   }
 );
 
+const logout = asyncHandler(async (req: any, res: Response): Promise<any> => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: { refreshToken: null } },
+    {
+      new: true,
+    }
+  );
 
-
-const logout = asyncHandler(
-  async (req: any, res: Response): Promise<any> => {
-
-   await User.findByIdAndUpdate(
-      req.user._id,
-      { $set: { refreshToken: null } },
-      {
-        new: true,
-      }
-    );
-
-    return res
-      .status(200)
-      .clearCookie("accessToken", cookieOptions)
-      .clearCookie("refreshToken", cookieOptions)
-      .json({ message: "User logged out successfully" });
-  }
-);
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json({ message: "User logged out successfully" });
+});
 
 const forgetPassword = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
 
     // Generate 4 digits OTP
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
@@ -103,38 +96,32 @@ const forgetPassword = asyncHandler(
 
     // send Otp
 
-
-
     return res
       .status(200)
-      .json({ message: "Otp has been sent to your Email" , otp});
+      .json({ message: "Otp has been sent to your Email", otp });
   }
 );
 
 const verifyOtp = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-
-    const { email,otp } = req.body;
+    const { email, otp } = req.body;
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if(user.otp !== otp){
+    if (user.otp !== otp) {
       return res.status(404).json({ message: "Invalid Otp" });
     }
 
-    return res
-      .status(200)
-      .json({ message: "Otp Verified Successfully"});
+    return res.status(200).json({ message: "Otp Verified Successfully" });
   }
 );
 
 const resetPassword = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-
-    const { email,otp ,password } = req.body;
+    const { email, otp, password } = req.body;
 
     const user = await User.findOne({ email });
 
@@ -142,7 +129,7 @@ const resetPassword = asyncHandler(
       return res.status(404).json({ message: "User not found" });
     }
 
-    if(user.otp !== otp){
+    if (user.otp !== otp) {
       return res.status(404).json({ message: "Invalid Otp" });
     }
 
@@ -150,16 +137,13 @@ const resetPassword = asyncHandler(
     user.otp = null;
     await user.save();
 
-    return res
-      .status(200)
-      .json({ message: "password updated successfully"});
+    return res.status(200).json({ message: "password updated successfully" });
   }
 );
 
 const changePassword = asyncHandler(
   async (req: any, res: Response): Promise<any> => {
-
-    const {password } = req.body;
+    const { password } = req.body;
 
     const user = await User.findById(req.user._id);
 
@@ -170,14 +154,18 @@ const changePassword = asyncHandler(
     user.password = password;
     await user.save();
 
-    return res
-      .status(200)
-      .json({ message: "password updated successfully"});
+    return res.status(200).json({ message: "password updated successfully" });
   }
 );
 
 
 
-
-
-export { signup, login,logout,forgetPassword,verifyOtp ,resetPassword ,changePassword};
+export {
+  signup,
+  login,
+  logout,
+  forgetPassword,
+  verifyOtp,
+  resetPassword,
+  changePassword,
+};
