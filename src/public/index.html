@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🚀 Server Status</title>
+    <style>
+        /* Google Font */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #fff;
+            text-align: center;
+        }
+
+        .container {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: glow 1.5s infinite alternate;
+        }
+
+        .time-box {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        span {
+            font-weight: bold;
+            color: #feca57;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); }
+            to { text-shadow: 0 0 20px rgba(255, 255, 255, 1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+  </head>
+  <body>
+
+    <div class="container">
+        <h1>🚀 Server is Running!</h1>
+        <div class="time-box">
+            <p>🕒 Server started at: <span id="startTime"></span></p>
+            <p>⏳ Running for: <span id="elapsedTime"></span></p>
+        </div>
+    </div>
+
+
+
+    <script>
+        fetch('/server-time')
+    .then(response => response.json())
+    .then(data => {
+        let startedTime = new Date(data.startTime); // Use actual server start time
+        document.getElementById("startTime").innerText = startedTime.toLocaleTimeString();
+
+        function updateElapsedTime() {
+            let now = new Date();
+            let elapsedSeconds = Math.floor((now - startedTime) / 1000); // Total seconds elapsed
+            
+            let hours = Math.floor(elapsedSeconds / 3600); // Convert to hours
+            let minutes = Math.floor((elapsedSeconds % 3600) / 60); // Convert remaining seconds to minutes
+            let seconds = elapsedSeconds % 60; // Remaining seconds
+
+            // Format time as HH:MM:SS
+            let formattedTime = `${hours}h ${minutes}m ${seconds}s`;
+            document.getElementById("elapsedTime").innerText = formattedTime;
+        }
+
+        // Update elapsed time every second
+        setInterval(updateElapsedTime, 1000);
+    })
+    .catch(error => console.error("Error fetching server time:", error));
+
+    </script>
+  </body>
+</html>
